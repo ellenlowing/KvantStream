@@ -255,7 +255,7 @@ MonoBehaviour:
   _maxParticles: 32768
   _emitterPosition: {x: 0, y: 0, z: 0}
   _emitterSize: {x: 50, y: 50, z: 50}
-  _throttle: 0.87
+  _throttle: 1
   _direction: {x: 1, y: 0, z: 0}
   _minSpeed: 5.99014
   _maxSpeed: 19.278912
@@ -264,7 +264,7 @@ MonoBehaviour:
   _noiseFrequency: 0.01
   _noiseSpeed: 2.42
   _color: {r: 1.5235808, g: 1.9751889, b: 2.093, a: 1}
-  _tail: 1.1
+  _tail: 1.6
   _randomSeed: 0
   _debug: 0
   _kernelShader: {fileID: 4800000, guid: 6afe8e4e613e44e00bcbd80b0615a8de, type: 3}
