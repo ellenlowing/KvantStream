@@ -10,12 +10,12 @@ Shader "Hidden/Kvant/Stream/Kernel"
     Properties
     {
         _MainTex     ("-", 2D)     = ""{}
-        _EmitterPos  ("-", Vector) = (0, 0, 20, 0)
+        _EmitterPos  ("-", Vector) = (0, 0, 0, 0)
         _EmitterSize ("-", Vector) = (40, 40, 40, 0)
         _Direction   ("-", Vector) = (0, 0, -1, 0.2)
         _SpeedParams ("-", Vector) = (5, 10, 0, 0)
         _NoiseParams ("-", Vector) = (0.2, 0.1, 1)  // (frequency, amplitude, animation)
-        _Config      ("-", Vector) = (1, 2, 0, 0)   // (throttle, life, random seed, dT)
+        _Config      ("-", Vector) = (1, 2, 0, 1)   // (throttle, life, random seed, dT)
     }
 
     CGINCLUDE
@@ -47,7 +47,7 @@ Shader "Hidden/Kvant/Stream/Kernel"
         float t = _Time.x;
 
         // Random position.
-        float3 p = float3(nrand(uv, t + 1), nrand(uv, t + 2), nrand(uv, t + 3));
+        float3 p = float3(nrand(uv, t+1), nrand(uv, t+2), nrand(uv, t+3));
         p = (p - (float3)0.5) * _EmitterSize + _EmitterPos;
 
         // Life duration.
@@ -63,11 +63,9 @@ Shader "Hidden/Kvant/Stream/Kernel"
     float3 get_velocity(float3 p, float2 uv)
     {
         // Random vector.
-        float3 v = float3(nrand(uv, 4), nrand(uv, 5), nrand(uv, 6));
-        v = (v - (float3)0.5) * 2;
-
-        // Apply the spread parameter.
-        v = lerp(_Direction.xyz, v, _Direction.w);
+        float angle = atan(p.y/p.x);
+        float radius = pow(pow(p.y,2) + pow(p.x,2), 0.5);
+        float3 v = float3(-sin(angle)*radius*0.5, cos(angle)*radius*0.5, 0);
 
         // Apply the speed parameter.
         v = normalize(v) * lerp(_SpeedParams.x, _SpeedParams.y, nrand(uv, 7));
@@ -75,9 +73,9 @@ Shader "Hidden/Kvant/Stream/Kernel"
 #ifdef NOISE_ON
         // Add noise vector.
         p = (p + _Time.y * _NoiseParams.z) * _NoiseParams.x;
-        float nx = cnoise(p + float3(138.2, 0, 0));
-        float ny = cnoise(p + float3(0, 138.2, 0));
-        float nz = cnoise(p + float3(0, 0, 138.2));
+        float nx = cnoise(p + float3(50, 0, 0));
+        float ny = cnoise(p + float3(0, 50, 0));
+        float nz = cnoise(p + float3(0, 0, 50));
         v += float3(nx, ny, nz) * _NoiseParams.y;
 #endif
         return v;

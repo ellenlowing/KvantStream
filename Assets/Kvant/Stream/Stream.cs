@@ -223,7 +223,7 @@ namespace Kvant
             mesh.vertices = VA;
             mesh.uv = TA;
             mesh.SetIndices(IA, MeshTopology.Lines, 0);
-            mesh.Optimize();
+            ;
 
             // Avoid being culled.
             mesh.bounds = new Bounds(Vector3.zero, Vector3.one * 1000);
