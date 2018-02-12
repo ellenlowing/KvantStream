@@ -62,8 +62,16 @@ Shader "Hidden/Kvant/Stream/Line"
         else
         {
             float3 p = lerp(p2.xyz, p1.xyz, (1.0 - sw) * _Tail);
+            float radius = pow(pow(p.z,2) + pow(p.x,2), 0.5);
+//            if(p.y > 0){
+//            	_Color = half4(0.5,0.5,0.5,0.5);
+//            }
+            
+
             o.position = UnityObjectToClipPos(float4(p, 1));
         }
+
+
 
         o.color = _Color;
         o.color.a *= sw;
