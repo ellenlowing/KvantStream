@@ -70,7 +70,7 @@ Shader "Hidden/Kvant/Stream/Kernel"
     // Position dependant velocity field.
     float3 get_velocity(float3 p, float2 uv)
     {
-    	float tx = _Time.x;
+    	float ty = _Time.y;
     	float sint = _SinTime.x;
     	float3 v;
         float angle = atan(p.x/p.z);
@@ -117,6 +117,20 @@ Shader "Hidden/Kvant/Stream/Kernel"
         return v;
     }
 
+    float3 get_damped_velocity (float3 p, float2 uv) {
+    	float ty = _Time.y;
+     	float3 v;
+        float angle = atan(p.x/p.z);
+        float radius = pow(pow(p.z,2) + pow(p.x,2) + pow(p.y,2), 0.5);
+        _SpeedParams.x = (radius < 4.0f)? 0 : 5;
+        _SpeedParams.y = (radius < 4.0f)? 0.1 : 10;
+        radius = radius / (ty + radius*0.5) ;
+        v = (p.z > 0) ? float3(-cos(angle)*radius*0.5, nrand(uv,4)/10 * negrand(uv), sin(angle)*radius*0.5) : float3(cos(angle)*radius*0.5, nrand(uv,4)/10 * negrand(uv), -sin(angle)*radius*0.5);
+
+        v = normalize(v) * lerp(_SpeedParams.x, _SpeedParams.y, nrand(uv, 7));
+        return v;
+    }
+
     // Pass 0: Initialization
     float4 frag_init(v2f_img i) : SV_Target 
     {
@@ -131,8 +145,8 @@ Shader "Hidden/Kvant/Stream/Kernel"
         {
             float dt = _Config.w;
             float radius = pow(pow(p.z,2) + pow(p.x,2) + pow(p.y,2), 0.5);
-            p.xyz = p.xyz + get_velocity(p.xyz, i.uv) * dt ; // position
-            p.w = (radius > 5.0f)? p.w - dt : 1; // life
+            p.xyz = (radius < 10.0f && radius > 2.0f)? p.xyz + get_damped_velocity(p.xyz, i.uv) * dt : p.xyz + get_velocity(p.xyz, i.uv) * dt ; // position
+            p.w = (radius > 4.0f)? p.w - dt : 1; // life
             return p;
         }
         else
