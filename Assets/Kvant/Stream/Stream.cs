@@ -55,6 +55,13 @@ namespace Kvant
         [SerializeField]
         bool _debug;
 
+		[SerializeField]
+		Vector3 _velocity;
+
+		[SerializeField]
+		Vector3 _position;
+
+
         #endregion
 
         #region Public Properties
@@ -123,6 +130,16 @@ namespace Kvant
             get { return _tail; }
             set { _tail = value; }
         }
+
+		public Vector3 velocity {
+			get { return _velocity; }
+			set { _velocity = value; }
+		}
+
+		public Vector3 position {
+			get { return _position; }
+			set { _position = value; }
+		}
 
         #endregion
 
@@ -256,7 +273,32 @@ namespace Kvant
 
             var life = 2.0f;
             m.SetVector("_Config", new Vector4(_throttle, life, _randomSeed, deltaTime));
+			m.SetVector("_Velocity", new Vector3(_velocity.x, _velocity.y, _velocity.z));
+			m.SetVector("_Position", new Vector3(_position.x, _position.y, _position.z));
         }
+
+		// Function that attempts to reverse velocity when spacebar is pressed
+		void ReverseVelocity(){
+			var m = _kernelMaterial;
+			m.SetVector("_Velocity", new Vector3(-(_velocity.x + position.x), -(_velocity.y + position.y), -(_velocity.z + position.z)));
+		}
+
+		void EnableNoise(){
+			var m = _kernelMaterial;
+			_noiseAmplitude = 20.0f;
+			_noiseFrequency = 4.0f/Time.time;
+			var np = new Vector3(_noiseFrequency, _noiseAmplitude, _noiseSpeed);
+			m.SetVector("_NoiseParams", np);
+			m.EnableKeyword("NOISE_ON");
+		}
+
+		void DisableNoise(){
+			var m = _kernelMaterial;
+			_noiseAmplitude = 0.0f;
+			var np = new Vector3(_noiseFrequency, _noiseAmplitude, _noiseSpeed);
+			m.SetVector("_NoiseParams", np);
+			m.DisableKeyword("NOISE_ON");
+		}
 
         void ResetResources()
         {
@@ -315,6 +357,19 @@ namespace Kvant
 
         void Update()
         {
+			// Particles become yellow when space bar is pressed
+			if(Input.GetKeyDown("space")){
+				_color = new Color (207.0f/255.0f, 16.0f/255.0f, 32.0f/255.0f, 0.6f);
+				EnableNoise ();
+				//ReverseVelocity(); // not working
+			}
+
+			// Becomes white when space bar is released
+			if (Input.GetKeyUp ("space")) {
+				_color = Color.white;
+				DisableNoise ();
+			}
+
             if (_needsReset) ResetResources();
 
             UpdateKernelShader();

@@ -61,13 +61,15 @@ Shader "Hidden/Kvant/Stream/Line"
         }
         else
         {
+        	float ty = _Time.y;
             float3 p = lerp(p2.xyz, p1.xyz, (1.0 - sw) * _Tail);
-            float radius = pow(pow(p.z,2) + pow(p.x,2), 0.5);
-//            if(p.y > 0){
-//            	_Color = half4(0.5,0.5,0.5,0.5);
-//            }
-            
+            float radius = pow(pow(p.z,2) + pow(p.x,2) + pow(p.y,2), 0.5);
+            float ratio = 1-radius/8.0f; // ratio to scale opacity
 
+            //If radius is bigger than 4.0f, particles are blue in color
+            if(radius > 4.0f){
+            	_Color = half4(16.0f/255.0f,52.0f/255.0f,166.0f/255.0f,ratio);
+            } 
             o.position = UnityObjectToClipPos(float4(p, 1));
         }
 
